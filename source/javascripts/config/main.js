@@ -1,7 +1,9 @@
 'use strict';
 
 angular.module('sif')
-.config(function($stateProvider, $urlRouterProvider){
+.config(function($stateProvider, $urlRouterProvider, $locationProvider){
+  $locationProvider.html5Mode({ enabled: true, requireBase: false });
+
   $urlRouterProvider.otherwise('/');
 
   $stateProvider
@@ -11,6 +13,7 @@ angular.module('sif')
     templateUrl: '/templates/home/search.html',
     controller: 'searchCtrl'
   })
+
 });
 
 'use strict';
