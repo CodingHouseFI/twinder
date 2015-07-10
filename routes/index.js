@@ -4,38 +4,36 @@ var routes = function(passport) {
   var Twitter = require("twitter");
   var router = express.Router();
 
-  function twitterClient(params) {
+  function twitterClient(user) {
     return new Twitter({
       consumer_key: process.env.CONSUMER_KEY,
       consumer_secret: process.env.CONSUMER_SECRET,
-      access_token_key: params.access_token_key,
-      access_token_secret: params.access_token_secret
+      access_token_key: user && user.twitter.token,
+      access_token_secret: user && user.twitter.tokenSecret
     });
   };
 
   router.get('/auth/twitter', passport.authenticate('twitter'));
 
   router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/' }), function(req, res) {
-    // Successful authentication, redirect home.
     res.redirect('/');
   });
 
   router.post('/tweet', function(req, res, next) {
-    var client = twitterClient(req.body);
 
+    var client = twitterClient(req.user);
     client.post('statuses/update', { status: req.body.tweet }, function(error, tweets, response){
       if (error) {
         console.error(error);
         res.status(500);
         return;
       }
-
       res.json(tweets);
     });
   });
 
   router.post('/search', function(req, res, next) {
-    var client = twitterClient(req.body);
+    var client = twitterClient(req.user);
     var words = req.body.words.toLowerCase().split(" ");
     console.log(words);
 
@@ -45,9 +43,7 @@ var routes = function(passport) {
         res.status(500);
         return;
       }
-
       var stats = {}, oneTweetWords, lowerCaseWord, users = {};
-
       tweets.statuses.forEach(function(tweet) {
         oneTweetWords = tweet.text.toLowerCase().split(" ");
         oneTweetWords.forEach(function(word) {
@@ -61,29 +57,29 @@ var routes = function(passport) {
           }
         });
       });
-
-      res.json({ stats: stats, users: users });
+      res.json({ stats: stats, users: users, isLoggedIn: !!req.user });
     });
-
   });
 
   router.post('/follow', function(req, res, next) {
-    var client = twitterClient(req.body);
-
+    var client = twitterClient(req.user);
     client.post('friendships/create', { screen_name: req.body.screen_name }, function(error, user, response){
       if (error) {
         console.error(error);
         res.status(500);
         return;
       }
-
       res.json(user);
     });
-
   });
 
-  router.get("/", function(req, res) {
-    res.render("index");
+  router.get("/auth/logout", function(req, res) {
+    req.logout();
+    res.redirect("/");
+  });
+
+  router.get("/*", function(req, res) {
+    res.render("index", { user: req.user });
   });
 
   return router;
