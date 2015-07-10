@@ -6,6 +6,11 @@ angular.module('sif')
 
   $stateProvider
   .state('home', {url: '/', templateUrl: '/templates/home/home.html'})
+  .state('search', {
+    url: '/q/:query',
+    templateUrl: '/templates/home/search.html',
+    controller: 'searchCtrl'
+  })
 });
 
 'use strict';

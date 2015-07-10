@@ -37,6 +37,7 @@ var routes = function(passport) {
   router.post('/search', function(req, res, next) {
     var client = twitterClient(req.body);
     var words = req.body.words.toLowerCase().split(" ");
+    console.log(words);
 
     client.get('search/tweets', { q: words.join(" OR "), count: 100 }, function(error, tweets, response){
       if (error) {
