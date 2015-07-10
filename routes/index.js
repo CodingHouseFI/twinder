@@ -82,6 +82,10 @@ var routes = function(passport) {
 
   });
 
+  router.get("/", function(req, res) {
+    res.render("index");
+  });
+
   return router;
 }
 
